@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>What Should I Watch Next?</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:Inter,sans-serif;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:80px 0 40px;
+  overflow:hidden;
+  background:#050505;
+  position:relative;
+}
+
+/* Fondo animado de olas lineales en grises */
+body::before{
+  content:"";
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.05) 0 2px,
+    rgba(0,0,0,0.05) 2px 4px
+  );
+  animation: wave 15s linear infinite;
+  z-index:-1;
+}
+
+@keyframes wave {
+  0% {background-position:0 0;}
+  100% {background-position:0 100%;}
+}
+
+/* Partículas flotantes grises */
+body::after{
+  content:"";
+  position:absolute; top:0; left:0;
+  width:100%; height:100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size:20px 20px;
+  animation: particles 30s linear infinite;
+  z-index:-1;
+}
+@keyframes particles{
+  0%{background-position:0 0;}
+  100%{background-position:200px 200px;}
+}
+
+.container{
+  background:#0a0a0a;
+  border:1px solid #1a1a1a;
+  padding:30px;
+  border-radius:14px;
+  width:440px;
+  box-shadow:0 0 80px rgba(0,0,0,.95);
+  text-align:center;
+  animation:fadeIn .6s ease;
+}
+
+.title{
+  font-size:24px;font-weight:700;margin-bottom:6px;transition:.3s;
+  background: linear-gradient(90deg,#fff,#aaa,#fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:textGradient 3s ease infinite;
+}
+@keyframes textGradient{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+.title:hover{transform:scale(1.05);}
+
+.subtitle{font-size:13px;color:#888;margin-bottom:20px;transition:.3s;}
+.subtitle:hover{transform:scale(1.02);}
+
+input{
+  width:100%;padding:10px;border-radius:8px;border:1px solid #222;
+  background:#050505;color:white;margin-bottom:10px;text-align:center;
+  transition:.3s, box-shadow .3s;
+}
+input:focus{border-color:#888;box-shadow:0 0 15px rgba(200,200,200,.5);}
+
+button{
+  padding:10px;border-radius:8px;border:none;background:#111;color:white;cursor:pointer;transition:.3s, box-shadow .3s;
+}
+button:hover{background:#1a1a1a;transform:scale(1.03);box-shadow:0 0 15px rgba(255,255,255,.2);}
+.main-btn{width:100%;margin-bottom:12px;padding:12px;font-weight:600;}
+
+.filter-row{display:flex;width:100%;gap:12px;margin-bottom:10px;}
+.filter-row>div{flex:1;}
+.filter-btn{width:100%;padding:12px;font-weight:600;background:#111;border-radius:8px;transition:.3s;}
+.filter-btn:hover{background:#1a1a1a;transform:scale(1.02);box-shadow:0 0 10px rgba(255,255,255,.15);}
+
+/* SLIDERS PRO */
+.slider-container{display:none;margin-top:14px;}
+.slider-wrapper{display:flex;align-items:center;gap:10px;position:relative;}
+.slider-label{font-size:12px;color:#fff;min-width:32px;text-align:center;}
+.slider{position:relative;flex:1;height:4px;background:#222;border-radius:4px;cursor:pointer;}
+.slider-range{position:absolute;height:100%;background:#888;border-radius:4px;transition:.2s;}
+.handle{position:absolute;top:50%;width:10px;height:10px;background:#888;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;transition:.2s;box-shadow:0 0 5px rgba(200,200,200,.5);}
+.handle:hover{transform:translate(-50%,-50%) scale(1.3);box-shadow:0 0 15px rgba(200,200,200,.8);}
+.tooltip{position:absolute;top:-20px;padding:2px 6px;background:#888;color:#fff;font-size:11px;border-radius:4px;pointer-events:none;opacity:0;transition:.2s;}
+
+/* GENRES */
+#genres{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;transition:.3s;}
+.genre-btn{padding:6px 12px;background:#111;border:1px solid #222;border-radius:20px;font-size:12px;cursor:pointer;transition:.2s, box-shadow .2s;}
+.genre-btn:hover{background:#888;color:#fff;transform:scale(1.1);box-shadow:0 0 25px rgba(255,255,255,.3);}
+
+/* RESULTS CARDS */
+#result{margin-top:15px;transition:.3s;}
+.spinner{width:30px;height:30px;border:3px solid #222;border-top:3px solid #888;border-radius:50%;margin:20px auto;animation:spin 1s linear infinite;}
+.card{
+  margin-top:15px;background:#050505;border-radius:12px;overflow:hidden;cursor:pointer;
+  border:1px solid #1a1a1a;transition:.3s, box-shadow .3s, transform .3s; transform-style:preserve-3d;
+  opacity:0; transform:translateY(10px);
+}
+.card.show{opacity:1; transform:translateY(0);}
+.card:hover{transform:scale(1.05) rotateX(2deg) rotateY(2deg); box-shadow:0 0 35px rgba(255,255,255,.15);}
+.card img{width:100%;height:300px;object-fit:cover;transition:.3s;}
+.card img:hover{transform:scale(1.02);}
+.card-content{padding:14px;}
+.card-title{font-size:16px;font-weight:600;margin-bottom:8px;transition:.2s;}
+.card-title:hover{color:#aaa;}
+.meta{font-size:12px;color:#aaa;line-height:1.6;}
+
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+#watermark {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3); /* blanco semi-transparente */
+  pointer-events: none; /* para que no interfiera con clicks */
+  font-family: Inter, sans-serif;
+  user-select: none; /* no se puede seleccionar */
+  z-index: 1000; /* siempre arriba */
+}
+#watermark:hover {
+  color: rgba(255, 255, 255, 0.5); /* un poquito más visible si pasas el cursor */
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">What Should I Watch Next?</div>
+  <div class="subtitle">Discover anime by your favorite genres</div>
+
+  <input id="username" placeholder="Enter your AniList username">
+  <button class="main-btn" onclick="loadUser()">Analyze Profile</button>
+  <button class="main-btn" onclick="recommendRandom()">Surprise Me!</button>
+  
+  <div class="filter-row">
+    <div style="flex:1;">
+      <button class="filter-btn" onclick="toggleSlider('yearSliderContainer')">Years</button>
+      <div id="yearSliderContainer" class="slider-container">
+        <div class="slider-wrapper">
+          <span id="yearMinLabel" class="slider-label"></span>
+          <div id="yearSlider" class="slider"></div>
+          <span id="yearMaxLabel" class="slider-label"></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;">
+      <button class="filter-btn" onclick="toggleSlider('epSliderContainer')">Episodes</button>
+      <div id="epSliderContainer" class="slider-container">
+        <div class="slider-wrapper">
+          <span id="epMinLabel" class="slider-label"></span>
+          <div id="epSlider" class="slider"></div>
+          <span id="epMaxLabel" class="slider-label"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="genres"></div>
+  <div id="result"></div>
+</div>
+
+<script>
+let watched=new Set();
+let topGenres=[];
+let filters={yearMin:1917,yearMax:2026,epMin:0,epMax:100};
+
+function toggleSlider(id){let el=document.getElementById(id);el.style.display=el.style.display==="block"?"none":"block";}
+
+function createSlider(element,min,max,keyMin,keyMax,labelMin,labelMax){
+  let slider=element;
+  let range=document.createElement("div"); range.className="slider-range";
+  let handleMin=document.createElement("div"); handleMin.className="handle";
+  let handleMax=document.createElement("div"); handleMax.className="handle";
+  let tooltipMin=document.createElement("div"); tooltipMin.className="tooltip";
+  let tooltipMax=document.createElement("div"); tooltipMax.className="tooltip";
+  slider.append(range,handleMin,handleMax,tooltipMin,tooltipMax);
+
+  function update(showTooltip=false){
+    let percentMin=(filters[keyMin]-min)/(max-min)*100;
+    let percentMax=(filters[keyMax]-min)/(max-min)*100;
+    range.style.left=percentMin+"%";
+    range.style.width=(percentMax-percentMin)+"%";
+    handleMin.style.left=percentMin+"%";
+    handleMax.style.left=percentMax+"%";
+    tooltipMin.style.left=percentMin+"%";
+    tooltipMax.style.left=percentMax+"%";
+    tooltipMin.innerText=filters[keyMin];
+    tooltipMax.innerText=filters[keyMax];
+    tooltipMin.style.opacity=showTooltip?1:0;
+    tooltipMax.style.opacity=showTooltip?1:0;
+  }
+
+  function setValue(clientX,handle){
+    let rect=slider.getBoundingClientRect();
+    let percent=(clientX-rect.left)/rect.width;
+    percent=Math.max(0,Math.min(1,percent));
+    let value=Math.round(min+percent*(max-min));
+    if(handle==="min"){filters[keyMin]=Math.min(value,filters[keyMax]-1);}
+    else{filters[keyMax]=Math.max(value,filters[keyMin]+1);}
+    update(true);
+  }
+
+  handleMin.onmousedown=e=>{
+    document.onmousemove=ev=>setValue(ev.clientX,"min");
+    document.onmouseup=()=>{document.onmousemove=null; update(false);}
+    update(true);
+  };
+  handleMax.onmousedown=e=>{
+    document.onmousemove=ev=>setValue(ev.clientX,"max");
+    document.onmouseup=()=>{document.onmousemove=null; update(false);}
+    update(true);
+  };
+  slider.onclick=e=>{
+    let rect=slider.getBoundingClientRect();
+    let clickValue=min+((e.clientX-rect.left)/rect.width)*(max-min);
+    let distMin=Math.abs(clickValue-filters[keyMin]);
+    let distMax=Math.abs(clickValue-filters[keyMax]);
+    setValue(e.clientX,distMin<distMax?"min":"max");
+  };
+  update();
+}
+
+createSlider(document.getElementById("yearSlider"),1917,2026,"yearMin","yearMax","yearMinLabel","yearMaxLabel");
+createSlider(document.getElementById("epSlider"),0,100,"epMin","epMax","epMinLabel","epMaxLabel");
+
+async function loadUser(){
+  let username=document.getElementById("username").value.trim();
+  if(!username) return;
+  watched.clear();
+  let query=`query($name:String){MediaListCollection(userName:$name,type:ANIME){lists{entries{media{id genres}}}}}`;
+  let res=await fetch("https://graphql.anilist.co",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({query,variables:{name:username}})});
+  let data=await res.json();
+  let entries=data.data?.MediaListCollection?.lists?.flatMap(l=>l.entries)||[];
+  let genreCount={};
+  entries.forEach(e=>{watched.add(e.media.id); e.media.genres.forEach(g=>{genreCount[g]=(genreCount[g]||0)+1;});});
+  let sortedGenres=Object.entries(genreCount).sort((a,b)=>b[1]-a[1]);
+  topGenres=sortedGenres.slice(0,5).map(g=>g[0]);
+  renderGenres();
+}
+
+function renderGenres(){
+  let div=document.getElementById("genres");
+  div.innerHTML="";
+  topGenres.forEach(g=>{
+    let btn=document.createElement("div");
+    btn.className="genre-btn"; btn.innerText=g;
+    btn.onclick=()=>recommend(g);
+    div.appendChild(btn);
+  });
+}
+
+async function recommend(genre){
+  let result=document.getElementById("result");
+  result.innerHTML="<div class='spinner'></div>";
+  let found=null; let attempts=0;
+  while(!found && attempts<25){
+    attempts++;
+    let page=Math.floor(Math.random()*30)+1;
+    let query=`query($genre:String,$page:Int){Page(page:$page,perPage:25){media(type:ANIME,genre:$genre,sort:SCORE_DESC){id title{romaji} coverImage{large} averageScore episodes season seasonYear format siteUrl studios{nodes{name}}}}}`;
+    try{
+      let res=await fetch("https://graphql.anilist.co",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({query,variables:{genre,page}})});
+      let data=await res.json();
+      if(!data.data?.Page?.media) continue;
+      let unseen=data.data.Page.media.filter(a=>a && a.id && !watched.has(a.id) &&
+        a.coverImage?.large && a.title?.romaji &&
+        a.episodes >= filters.epMin && a.episodes <= filters.epMax &&
+        a.seasonYear >= filters.yearMin && a.seasonYear <= filters.yearMax
+      );
+      if(unseen.length){found=unseen[Math.floor(Math.random()*unseen.length)]; break;}
+    }catch(e){console.error(e);continue;}
+  }
+
+  if(!found){result.innerHTML="No recommendation found."; return;}
+  let studio=found.studios?.nodes?.[0]?.name||"Unknown";
+  result.innerHTML=`<div class="card show" onclick="window.open('${found.siteUrl}','_blank')">
+  <img src="${found.coverImage.large}">
+  <div class="card-content">
+  <div class="card-title">${found.title.romaji}</div>
+  <div class="meta">
+  Score: ${found.averageScore||"N/A"}<br>
+  Studio: ${studio}<br>
+  Episodes: ${found.episodes||"Unknown"}<br>
+  Season: ${found.season||"Unknown"} ${found.seasonYear||""}<br>
+  Format: ${found.format||"Unknown"}
+  </div>
+  </div>
+  </div>`;
+}
+
+async function recommendRandom() {
+  let result = document.getElementById("result");
+  result.innerHTML = "<div class='spinner'></div>";
+  let found = null;
+  let attempts = 0;
+
+  while(!found && attempts < 25) {
+    attempts++;
+    let page = Math.floor(Math.random() * 30) + 1;
+    let query = `
+      query($page:Int){
+        Page(page:$page, perPage:25){
+          media(type:ANIME, sort:SCORE_DESC){
+            id
+            title { romaji }
+            coverImage { large }
+            averageScore
+            episodes
+            season
+            seasonYear
+            format
+            siteUrl
+            studios { nodes { name } }
+          }
+        }
+      }`;
+    try {
+      let res = await fetch("https://graphql.anilist.co", {
+        method: "POST",
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ query, variables: { page } })
+      });
+      let data = await res.json();
+      if(!data.data?.Page?.media) continue;
+
+      let unseen = data.data.Page.media.filter(a => 
+        a && a.id && !watched.has(a.id) &&
+        a.coverImage?.large && a.title?.romaji &&
+        a.episodes >= filters.epMin && a.episodes <= filters.epMax &&
+        a.seasonYear >= filters.yearMin && a.seasonYear <= filters.yearMax
+      );
+
+      if(unseen.length){
+        found = unseen[Math.floor(Math.random() * unseen.length)];
+        break;
+      }
+    } catch(e) { console.error(e); continue; }
+  }
+
+  if(!found) { 
+    result.innerHTML = "No recommendation found."; 
+    return;
+  }
+
+  let studio = found.studios?.nodes?.[0]?.name || "Unknown";
+  result.innerHTML = `
+    <div class="card show" onclick="window.open('${found.siteUrl}','_blank')">
+      <img src="${found.coverImage.large}">
+      <div class="card-content">
+        <div class="card-title">${found.title.romaji}</div>
+        <div class="meta">
+          Score: ${found.averageScore||"N/A"}<br>
+          Studio: ${studio}<br>
+          Episodes: ${found.episodes||"Unknown"}<br>
+          Season: ${found.season||"Unknown"} ${found.seasonYear||""}<br>
+          Format: ${found.format||"Unknown"}
+        </div>
+      </div>
+    </div>`;
+}
+</script>
+
+<div id="watermark">Page Created By @Alen</div>
+
+</body>
+</html>
